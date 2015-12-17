@@ -36,14 +36,14 @@ along with distance_stats. If not, see <http://www.gnu.org/licenses/>.
 void usage(char* progname) {
   // Usage
   std::cout << progname << " v" << MAJOR_VERSION << "." << MINOR_VERSION << std::endl;
-  std::cout << "Usage: " << progname << " -i [input.json] -o [output_file] " << std::endl;
+  std::cout << "Usage: " << progname << " -i [input.json] -o [output_file_basename] " << std::endl;
   exit(1);
 }
 
 int main(int argc, char** argv) {
   std::cout << "********* DISTANCE STATISTICS *********" << std::endl;
 
-  std::string input_name, output_name;
+  std::string input_name, output_basename, output_fixed_name, output_dynamic_name, output_gnuplot_name;
   if (argc > 2) { /* Parse arguments, if there are arguments supplied */
     for (int i = 1; i < argc; i++) {
       if ((argv[i][0] == '-') || (argv[i][0] == '/')) {       // switches or options...
@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
           input_name = argv[++i];
           break;
         case 'o':
-          output_name = argv[++i];
+          output_basename = argv[++i];
           break;
         default:    // no match...
           std::cout << "ERROR: Flag \"" << argv[i] << "\" not recognized. Quitting..." << std::endl;
@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
 
   // Safety checks for file manipulations
   std::ifstream input_file;
-  std::ofstream output_file;
+  std::ofstream output_fixed_bins, output_dynamic_bins, output_gnuplot_script;
 
   if (input_name.size() > 5) {
     if (input_name.substr(input_name.size() - 5, 5) != ".json") {
@@ -91,12 +91,30 @@ int main(int argc, char** argv) {
   }
   else { std::cout << "SUCCESS: file " << input_name << " opened!\n"; }
   input_file.close();
-  output_file.open(output_name.c_str());
-  if (!input_file) {
-    std::cout << "FAILED: Output file " << output_name << " could not be opened. Quitting..." << std::endl;
+
+  output_fixed_name = output_basename + "_fixed_bins.txt";
+  output_dynamic_name = output_basename + "_dynamic_bins.txt";
+  output_gnuplot_name = output_basename + "_dinamic_bins.plt";
+  
+  output_fixed_bins.open(output_fixed_name.c_str());
+  output_dynamic_bins.open(output_dynamic_name.c_str());
+  output_gnuplot_script.open(output_gnuplot_name.c_str());
+
+  if (!output_fixed_bins) {
+    std::cout << "FAILED: Output file " << output_fixed_name << " could not be opened. Quitting..." << std::endl;
     exit(223);
   }
-  else { std::cout << "SUCCESS: file " << output_name << " opened!\n"; }
+  else { std::cout << "SUCCESS: file " << output_fixed_name << " opened!\n"; }
+  if (!output_dynamic_bins) {
+    std::cout << "FAILED: Output file " << output_dynamic_name << " could not be opened. Quitting..." << std::endl;
+    exit(223);
+  }
+  else { std::cout << "SUCCESS: file " << output_dynamic_name << " opened!\n"; }
+  if (!output_gnuplot_script) {
+    std::cout << "FAILED: Output file " << output_gnuplot_name << " could not be opened. Quitting..." << std::endl;
+    exit(223);
+  }
+  else { std::cout << "SUCCESS: file " << output_gnuplot_name << " opened!\n"; }
 
   // Importing json distance database
   jsoncons::json distance_records = jsoncons::json::parse_file(input_name);
@@ -137,7 +155,7 @@ int main(int argc, char** argv) {
 
   for (size_t i = 0; i < distances.size(); i++) {
     for (size_t j = 0; j < bins.size(); j++) {
-      if (distances[i] < dist_thresholds[j]) bins[j]++;
+      if (distances[i] <= dist_thresholds[j]) bins[j]++;
     }
   }
 
@@ -146,12 +164,12 @@ int main(int argc, char** argv) {
   int bin_n = int(max_dist / bin_w) + 1;
   std::vector<int> dynamic_bins(bin_n, 0);
   std::vector<double> fraction_bins, cumulative_bins;
-  cumulative_bins.push_back(0.0);
 
   for (size_t i = 0; i < distances.size(); i++) dynamic_bins[int(distances[i] / bin_w)]++;
 
   for (auto b : dynamic_bins) fraction_bins.push_back(b / double(distances.size()));
 
+  cumulative_bins.push_back(fraction_bins[0]);
   for (size_t i = 1; i < fraction_bins.size(); i++) cumulative_bins.push_back(cumulative_bins.back() + fraction_bins[i]);
 
   std::vector<double> frac_thresholds({ 0.5, 0.66, 0.75, 0.90, 0.95, 0.99, 1.00 });  // move to config file ?
@@ -166,24 +184,29 @@ int main(int argc, char** argv) {
   }
 
   //Write output file, compatible with gnuplot
-  output_file << "#";
-  for (auto a : dist_thresholds) output_file << std::setw(6) << a << "  ";
-  output_file << std::endl;
-  output_file << "#";
-  for (auto a : bins) output_file << std::setw(6) << a << "  ";
-  output_file << std::endl;
-
   size_t counter = 0;
-  for (auto a : fraction_bins) {
-    output_file << counter << " ";
-    output_file << counter*bin_w << " ";
-    output_file << (counter+1)*bin_w << " ";
-    output_file << a << " ";
-    output_file << cumulative_bins[counter] << " ";
-    output_file << std::endl;
+  for (auto a : dist_thresholds) {
+    output_fixed_bins << std::setw(6) << a << "\t" << bins[counter] << std::endl;
     counter++;
   }
 
-  output_file.close();
+  counter = 0;
+  for (auto a : fraction_bins) {
+    output_dynamic_bins << counter << "\t";
+    output_dynamic_bins << counter*bin_w << "\t";
+    output_dynamic_bins << (counter+1)*bin_w << "\t";
+    output_dynamic_bins << a /*fraction_bins[counter]*/ << "\t";
+    output_dynamic_bins << cumulative_bins[counter] << "\t";
+    output_dynamic_bins << std::endl;
+    counter++;
+  }
+
+
+  output_fixed_bins.close();
+  output_dynamic_bins.close();
+  output_gnuplot_script.close();
+
   return 0;
 }
+
+
