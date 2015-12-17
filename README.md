@@ -10,9 +10,9 @@ Uses [jsoncons library](https://github.com/danielaparker/jsoncons).
 
 ### Usage
 ```
-distance_stats.exe -i input.json
+distance_stats.exe -i input.json -o output_file
 ```
-where *input.json* must be an existing and valid .json file
+where *input.json* must be an existing and valid .json file and *output_file* must be accessible.
 
 
 
