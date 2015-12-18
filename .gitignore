@@ -200,3 +200,5 @@ FakesAssemblies/
 *.ipdb
 *.iobj
 *.exe
+*.png
+*.plt
