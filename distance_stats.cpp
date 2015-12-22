@@ -31,7 +31,7 @@ along with distance_stats. If not, see <http://www.gnu.org/licenses/>.
 #define DEG_TO_RAD                1.745329251e-2                        // pi/180
 
 #define MAJOR_VERSION           1
-#define MINOR_VERSION           2
+#define MINOR_VERSION           3
 
 void usage(char* progname) {
   // Usage
@@ -43,8 +43,10 @@ void usage(char* progname) {
 int main(int argc, char** argv) {
   std::cout << "********* DISTANCE STATISTICS *********" << std::endl;
 
-  std::string input_name, output_basename, output_fixed_name, output_dist_dynamic_name, output_lat_dist_dynamic_name, output_lon_dist_dynamic_name, 
-    output_index_name, output_gnuplot_fraction_name, output_png_fraction_name, output_gnuplot_cumulative_name, output_png_cumulative_name;
+  std::string input_name, output_basename, output_fixed_name, output_dist_dynamic_name, output_lat_dist_dynamic_name, output_lon_dist_dynamic_name, output_angles_name,
+    output_index_name, output_gnuplot_fraction_name, output_png_fraction_name, output_gnuplot_cumulative_name, output_png_cumulative_name,
+    output_gnuplot_angles_name, output_png_angles_name, output_gnuplot_anglesdistances_name, output_png_anglesdistances_name;
+
   if (argc > 2) { /* Parse arguments, if there are arguments supplied */
     for (int i = 1; i < argc; i++) {
       if ((argv[i][0] == '-') || (argv[i][0] == '/')) {       // switches or options...
@@ -73,8 +75,8 @@ int main(int argc, char** argv) {
 
   // Safety checks for file manipulations
   std::ifstream input_file;
-  std::ofstream output_fixed_bins, output_dist_dynamic_bins, output_lat_dist_dynamic_bins, output_lon_dist_dynamic_bins, 
-    output_indexes, output_gnuplot_fraction_script, output_gnuplot_cumulative_script;
+  std::ofstream output_fixed_bins, output_dist_dynamic_bins, output_lat_dist_dynamic_bins, output_lon_dist_dynamic_bins, output_angles_bins,
+    output_indexes, output_gnuplot_fraction_script, output_gnuplot_cumulative_script, output_gnuplot_angles_script, output_gnuplot_anglesdistances_script;
 
   if (input_name.size() > 5) {
     if (input_name.substr(input_name.size() - 5, 5) != ".json") {
@@ -99,18 +101,26 @@ int main(int argc, char** argv) {
   output_dist_dynamic_name = output_basename + "_dist_dynamic_bins.txt";
   output_lat_dist_dynamic_name = output_basename + "_lat_dist_dynamic_bins.txt";
   output_lon_dist_dynamic_name = output_basename + "_lon_dist_dynamic_bins.txt";
+  output_angles_name = output_basename + "_angles_bins.txt";
   output_gnuplot_fraction_name = output_basename + "_dynamic_fraction_bins.plt";
   output_png_fraction_name = output_basename + "_dynamic_fraction_bins.png";
   output_gnuplot_cumulative_name = output_basename + "_dynamic_cumulative_bins.plt";
   output_png_cumulative_name = output_basename + "_dynamic_cumulative_bins.png";
+  output_gnuplot_angles_name = output_basename + "_angles_bins.plt";
+  output_png_angles_name = output_basename + "_angles_bins.png";
+  output_gnuplot_anglesdistances_name = output_basename + "_anglesdistances_bins.plt";
+  output_png_anglesdistances_name = output_basename + "_anglesdistances_bins.png";
 
   output_indexes.open(output_index_name.c_str());
   output_fixed_bins.open(output_fixed_name.c_str());
   output_dist_dynamic_bins.open(output_dist_dynamic_name.c_str());
   output_lat_dist_dynamic_bins.open(output_lat_dist_dynamic_name.c_str());
   output_lon_dist_dynamic_bins.open(output_lon_dist_dynamic_name.c_str());
+  output_angles_bins.open(output_lon_dist_dynamic_name.c_str());
   output_gnuplot_fraction_script.open(output_gnuplot_fraction_name.c_str());
   output_gnuplot_cumulative_script.open(output_gnuplot_cumulative_name.c_str());
+  output_gnuplot_angles_script.open(output_gnuplot_angles_name.c_str());
+  output_gnuplot_anglesdistances_script.open(output_gnuplot_anglesdistances_name.c_str());
 
   if (!output_indexes) {
     std::cout << "FAILED: Output file " << output_index_name << " could not be opened. Quitting..." << std::endl;
@@ -147,12 +157,22 @@ int main(int argc, char** argv) {
     exit(223);
   }
   else { std::cout << "SUCCESS: file " << output_gnuplot_cumulative_name << " opened!\n"; }
+  if (!output_gnuplot_angles_script) {
+    std::cout << "FAILED: Output file " << output_gnuplot_angles_name << " could not be opened. Quitting..." << std::endl;
+    exit(223);
+  }
+  else { std::cout << "SUCCESS: file " << output_gnuplot_angles_name << " opened!\n"; }
+  if (!output_gnuplot_anglesdistances_script) {
+    std::cout << "FAILED: Output file " << output_gnuplot_anglesdistances_name << " could not be opened. Quitting..." << std::endl;
+    exit(223);
+  }
+  else { std::cout << "SUCCESS: file " << output_gnuplot_anglesdistances_name << " opened!\n"; }
 
 
 
   // Importing json distance database
   jsoncons::json distance_records = jsoncons::json::parse_file(input_name);
-  std::vector<double> distances, lat_distances, lon_distances;
+  std::vector<double> distances, lat_distances, lon_distances, angles;
 
   if (distance_records.is_object()) {         // object-style
     int i = 0;
@@ -161,6 +181,7 @@ int main(int argc, char** argv) {
         if (rec->value().has_member("distance")) distances.push_back(rec->value()["distance"].as<double>());
         if (rec->value().has_member("dst_lat")) lat_distances.push_back(rec->value()["dst_lat"].as<double>());
         if (rec->value().has_member("dst_lon")) lon_distances.push_back(rec->value()["dst_lon"].as<double>());
+        if (rec->value().has_member("angle")) angles.push_back(rec->value()["angle"].as<double>());
       }
       catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
@@ -173,12 +194,30 @@ int main(int argc, char** argv) {
         if (distance_records[i].has_member("distance")) distances.push_back(distance_records[i]["distance"].as<double>());
         if (distance_records[i].has_member("dst_lat")) lat_distances.push_back(distance_records[i]["dst_lat"].as<double>());
         if (distance_records[i].has_member("dst_lon")) lon_distances.push_back(distance_records[i]["dst_lon"].as<double>());
+        if (distance_records[i].has_member("angle")) angles.push_back(distance_records[i]["angle"].as<double>());
       }
       catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
       }
     }
   }
+
+  //// Statistics on angle vector
+  double angle_bin_w = 2.0;                                                          // move to config file ?
+  int angle_bin_size = int(360.0 / angle_bin_w);
+  std::vector<double> angle_distance(angle_bin_size);
+  std::vector<double> angle_counter(angle_bin_size);
+  for (size_t i = 0; i < angles.size(); i++) {
+    int bin_index = int(angles[i] / angle_bin_w);
+    if (bin_index == angle_bin_size) bin_index--;
+    angle_distance[bin_index] += distances[i];
+    angle_counter[bin_index]++;
+  }
+
+  for (int i = 0; i < angle_bin_size; i++) {
+    output_angles_bins << i << "\t" << i*angle_bin_w << "\t" << (i + 1)*angle_bin_w << "\t" << angle_counter[i] << "\t" << angle_distance[i] << std::endl;
+  }
+
 
   //// Statistics on distance vector
   std::vector<double> distance_thresholds({ 1.0, 3.0, 5.0, 7.5, 15.0 });             // move to config file ?
@@ -244,13 +283,13 @@ int main(int argc, char** argv) {
   std::vector<double> lon_distances_fraction_bins, lon_distances_cumulative_bins;
 
   for (size_t i = 0; i < distances.size(); i++) distance_dyn_binning[int(distances[i] / bin_w)]++;
-  for (size_t i = 0; i < lat_distances.size(); i++) lat_distance_dyn_binning[int((lat_distances[i]-inf_lat_distance) / bin_w)]++;
-  for (size_t i = 0; i < lon_distances.size(); i++) lon_distance_dyn_binning[int((lon_distances[i]-inf_lon_distance) / bin_w)]++;
-  
+  for (size_t i = 0; i < lat_distances.size(); i++) lat_distance_dyn_binning[int((lat_distances[i] - inf_lat_distance) / bin_w)]++;
+  for (size_t i = 0; i < lon_distances.size(); i++) lon_distance_dyn_binning[int((lon_distances[i] - inf_lon_distance) / bin_w)]++;
+
   for (auto b : distance_dyn_binning) distances_fraction_bins.push_back(b / double(distances.size()));
   for (auto b : lat_distance_dyn_binning) lat_distances_fraction_bins.push_back(b / double(lat_distances.size()));
   for (auto b : lon_distance_dyn_binning) lon_distances_fraction_bins.push_back(b / double(lon_distances.size()));
-  
+
   distances_cumulative_bins.push_back(distances_fraction_bins[0]);
   for (size_t i = 1; i < distances_fraction_bins.size(); i++) distances_cumulative_bins.push_back(distances_cumulative_bins.back() + distances_fraction_bins[i]);
 
@@ -376,13 +415,25 @@ int main(int argc, char** argv) {
   output_gnuplot_cumulative_script << "FILE_IN_LON u ($2+$3)/2:5 w points pt 2 ps 3 lw 3 lc rgb 'dark-green' t 'lon'";
   output_gnuplot_cumulative_script << "\n";
 
+  output_gnuplot_angles_script << "#!/gnuplot\n";
+  output_gnuplot_angles_script << "FILE_OUT='" << output_png_angles_name << "'\n";
+
+  output_gnuplot_anglesdistances_script << "#!/gnuplot\n";
+  output_gnuplot_anglesdistances_script << "FILE_OUT='" << output_png_anglesdistances_name << "'\n";
+
+
+
   output_indexes.close();
   output_fixed_bins.close();
   output_dist_dynamic_bins.close();
   output_lat_dist_dynamic_bins.close();
   output_lon_dist_dynamic_bins.close();
+  output_angles_bins.close();
   output_gnuplot_fraction_script.close();
   output_gnuplot_cumulative_script.close();
+  output_gnuplot_angles_script.close();
+  output_gnuplot_anglesdistances_script.close();
+
 
   return 0;
 }
