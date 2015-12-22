@@ -116,7 +116,7 @@ int main(int argc, char** argv) {
   output_dist_dynamic_bins.open(output_dist_dynamic_name.c_str());
   output_lat_dist_dynamic_bins.open(output_lat_dist_dynamic_name.c_str());
   output_lon_dist_dynamic_bins.open(output_lon_dist_dynamic_name.c_str());
-  output_angles_bins.open(output_lon_dist_dynamic_name.c_str());
+  output_angles_bins.open(output_angles_name.c_str());
   output_gnuplot_fraction_script.open(output_gnuplot_fraction_name.c_str());
   output_gnuplot_cumulative_script.open(output_gnuplot_cumulative_name.c_str());
   output_gnuplot_angles_script.open(output_gnuplot_angles_name.c_str());
@@ -147,6 +147,11 @@ int main(int argc, char** argv) {
     exit(223);
   }
   else { std::cout << "SUCCESS: file " << output_lon_dist_dynamic_name << " opened!\n"; }
+  if (!output_angles_bins) {
+    std::cout << "FAILED: Output file " << output_angles_name << " could not be opened. Quitting..." << std::endl;
+    exit(223);
+  }
+  else { std::cout << "SUCCESS: file " << output_angles_name << " opened!\n"; }
   if (!output_gnuplot_fraction_script) {
     std::cout << "FAILED: Output file " << output_gnuplot_fraction_name << " could not be opened. Quitting..." << std::endl;
     exit(223);
@@ -416,10 +421,18 @@ int main(int argc, char** argv) {
   output_gnuplot_cumulative_script << "\n";
 
   output_gnuplot_angles_script << "#!/gnuplot\n";
+  output_gnuplot_angles_script << "FILE_IN='" << output_angles_name << "'\n";
   output_gnuplot_angles_script << "FILE_OUT='" << output_png_angles_name << "'\n";
+  output_gnuplot_angles_script << "set terminal pngcairo size " << Xres << ',' << Yres << " font \",25\"\n";
+  output_gnuplot_angles_script << "set output FILE_OUT\n";
+  output_gnuplot_angles_script << "\n";
 
   output_gnuplot_anglesdistances_script << "#!/gnuplot\n";
+  output_gnuplot_anglesdistances_script << "FILE_IN='" << output_angles_name << "'\n";
   output_gnuplot_anglesdistances_script << "FILE_OUT='" << output_png_anglesdistances_name << "'\n";
+  output_gnuplot_anglesdistances_script << "set terminal pngcairo size " << Xres << ',' << Yres << " font \",25\"\n";
+  output_gnuplot_anglesdistances_script << "set output FILE_OUT\n";
+  output_gnuplot_anglesdistances_script << "\n";
 
 
 
