@@ -30,8 +30,8 @@ along with distance_stats. If not, see <http://www.gnu.org/licenses/>.
 #define RAD_TO_DEG                57.2957795131                         // 180/pi
 #define DEG_TO_RAD                1.745329251e-2                        // pi/180
 
-#define MAJOR_VERSION           1
-#define MINOR_VERSION           2
+#define MAJOR_VERSION           2
+#define MINOR_VERSION           0
 
 void usage(char* progname) {
   // Usage
@@ -43,7 +43,7 @@ void usage(char* progname) {
 int main(int argc, char** argv) {
   std::cout << "********* DISTANCE STATISTICS *********" << std::endl;
 
-  std::string input_name, output_basename, output_fixed_name, output_dynamic_name, output_gnuplot_name;
+  std::string input_name, output_basename, output_fixed_name, output_dynamic_name, output_gnuplot_name, output_angles_name;
   if (argc > 2) { /* Parse arguments, if there are arguments supplied */
     for (int i = 1; i < argc; i++) {
       if ((argv[i][0] == '-') || (argv[i][0] == '/')) {       // switches or options...
@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
 
   // Safety checks for file manipulations
   std::ifstream input_file;
-  std::ofstream output_fixed_bins, output_dynamic_bins, output_gnuplot_script;
+  std::ofstream output_fixed_bins, output_dynamic_bins, output_gnuplot_script, output_angles_bins;
 
   if (input_name.size() > 5) {
     if (input_name.substr(input_name.size() - 5, 5) != ".json") {
@@ -95,7 +95,9 @@ int main(int argc, char** argv) {
   output_fixed_name = output_basename + "_fixed_bins.txt";
   output_dynamic_name = output_basename + "_dynamic_bins.txt";
   output_gnuplot_name = output_basename + "_dinamic_bins.plt";
-  
+  output_angles_name = output_basename + "_angles_bins.txt";
+
+  output_angles_bins.open(output_angles_name.c_str());
   output_fixed_bins.open(output_fixed_name.c_str());
   output_dynamic_bins.open(output_dynamic_name.c_str());
   output_gnuplot_script.open(output_gnuplot_name.c_str());
@@ -118,13 +120,14 @@ int main(int argc, char** argv) {
 
   // Importing json distance database
   jsoncons::json distance_records = jsoncons::json::parse_file(input_name);
-  std::vector<double> distances;
+  std::vector<double> distances, angles;
 
   if (distance_records.is_object()) {         // object-style
     int i = 0;
     for (auto rec = distance_records.begin_members(); rec != distance_records.end_members(); ++rec, ++i) {
       try {
         if (rec->value().has_member("distance")) distances.push_back(rec->value()["distance"].as<double>());
+        if (rec->value().has_member("angle")) angles.push_back(rec->value()["angle"].as<double>());
       }
       catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
@@ -135,6 +138,7 @@ int main(int argc, char** argv) {
     for (size_t i = 0; i < distance_records.size(); ++i) {
       try {
         if (distance_records[i].has_member("distance")) distances.push_back(distance_records[i]["distance"].as<double>());
+        if (distance_records[i].has_member("angle")) angles.push_back(distance_records[i]["angle"].as<double>());
       }
       catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
@@ -183,6 +187,19 @@ int main(int argc, char** argv) {
     }
   }
 
+  //// Statistics on angles
+  double angle_bin_w = 2.0;
+  int angle_bin_size = int(360.0 / angle_bin_w);
+  std::vector<double> angle_distance(angle_bin_size);
+  std::vector<double> angle_counter(angle_bin_size);
+  for (size_t i = 0; i < angles.size(); i++) {
+    int bin_index = int(angles[i] / angle_bin_w);
+    if (bin_index == angle_bin_size) bin_index--;
+    angle_distance[bin_index] += distances[i];
+    angle_counter[bin_index]++;
+  }
+  
+
   //Write output file, compatible with gnuplot
   size_t counter = 0;
   for (auto a : dist_thresholds) {
@@ -201,10 +218,14 @@ int main(int argc, char** argv) {
     counter++;
   }
 
+  for (int i = 0; i < angle_bin_size; i++) {
+    output_angles_bins << i << "\t" << i*angle_bin_w << "\t" << (i + 1)*angle_bin_w << "\t" << angle_counter[i] << "\t" << angle_distance[i] << std::endl;
+  }
 
   output_fixed_bins.close();
   output_dynamic_bins.close();
   output_gnuplot_script.close();
+  output_angles_bins.close();
 
   return 0;
 }
