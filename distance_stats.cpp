@@ -425,6 +425,13 @@ int main(int argc, char** argv) {
   output_gnuplot_angles_script << "FILE_OUT='" << output_png_angles_name << "'\n";
   output_gnuplot_angles_script << "set terminal pngcairo size " << Xres << ',' << Yres << " font \",25\"\n";
   output_gnuplot_angles_script << "set output FILE_OUT\n";
+  output_gnuplot_angles_script << "set key bottom right\n";
+  output_gnuplot_angles_script << "set angles degrees\n";
+  output_gnuplot_angles_script << "set polar\n";
+  output_gnuplot_angles_script << "set grid polar 15.\n";
+  output_gnuplot_angles_script << "unset border\n";
+  output_gnuplot_angles_script << "unset param\n";
+  output_gnuplot_angles_script << "plot FILE_IN u 2:4 notitle\n";
   output_gnuplot_angles_script << "\n";
 
   output_gnuplot_anglesdistances_script << "#!/gnuplot\n";
@@ -432,8 +439,15 @@ int main(int argc, char** argv) {
   output_gnuplot_anglesdistances_script << "FILE_OUT='" << output_png_anglesdistances_name << "'\n";
   output_gnuplot_anglesdistances_script << "set terminal pngcairo size " << Xres << ',' << Yres << " font \",25\"\n";
   output_gnuplot_anglesdistances_script << "set output FILE_OUT\n";
+  output_gnuplot_anglesdistances_script << "set key bottom right\n";
+  output_gnuplot_anglesdistances_script << "set angles degrees\n";
+  output_gnuplot_anglesdistances_script << "set polar\n";
+  output_gnuplot_anglesdistances_script << "set grid polar 15.\n";
+  output_gnuplot_anglesdistances_script << "unset border\n";
+  output_gnuplot_anglesdistances_script << "unset param\n";
+  output_gnuplot_anglesdistances_script << "set style data line\n";
+  output_gnuplot_anglesdistances_script << "plot FILE_IN u 2:4 notitle\n";
   output_gnuplot_anglesdistances_script << "\n";
-
 
 
   output_indexes.close();
