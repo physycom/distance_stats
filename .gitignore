@@ -202,3 +202,4 @@ FakesAssemblies/
 *.exe
 *.png
 *.plt
+*.tlog
