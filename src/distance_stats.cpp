@@ -34,14 +34,12 @@ along with distance_stats. If not, see <http://www.gnu.org/licenses/>.
 #define MINOR_VERSION           3
 
 void usage(char* progname) {
-  // Usage
-  std::cout << progname << " v" << MAJOR_VERSION << "." << MINOR_VERSION << std::endl;
   std::cout << "Usage: " << progname << " -i [input.json] -o [output_file_basename] " << std::endl;
   exit(1);
 }
 
 int main(int argc, char** argv) {
-  std::cout << "********* DISTANCE STATISTICS *********" << std::endl;
+  std::cout << "DistanceStats v" << MAJOR_VERSION << "." << MINOR_VERSION << std::endl;
 
   std::string input_name, output_basename, output_fixed_name, output_dist_dynamic_name, output_lat_dist_dynamic_name, output_lon_dist_dynamic_name, output_angles_name,
     output_index_name, output_gnuplot_fraction_name, output_png_fraction_name, output_gnuplot_cumulative_name, output_png_cumulative_name,
