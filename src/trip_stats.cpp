@@ -163,13 +163,13 @@ int main(int argc, char** argv) {
 
   // parsing command line
   std::vector<std::string> input;
-  if (argc > 2) {
+  if (argc > 1) {
     for (int i = 1; i < argc; i++) {
       input.push_back(argv[i]);
     }
   }
   else {
-    std::cout << "No flags specified. Read usage and relaunch properly." << std::endl;
+    std::cout << "No arguments supplied. Read usage and relaunch properly." << std::endl;
     usage(argv[0]);
   }
   std::cout << "File(s) to parse : ";
@@ -188,7 +188,7 @@ int main(int argc, char** argv) {
     else ifile.close();
   }
   cell_width += 3;
-  if (cell_width < 15) cell_width = 15;
+  if (cell_width < 27) cell_width = 27;
 
   // parsing input json
   std::vector<Trip_Stats> trip_stats;
