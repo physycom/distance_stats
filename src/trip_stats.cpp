@@ -22,15 +22,13 @@ along with distance_stats. If not, see <http://www.gnu.org/licenses/>.
 
 #include "jsoncons/json.hpp"
 
-#define MAJOR_VERSION           1
-#define MINOR_VERSION           1
+#define MAJOR_VERSION             1
+#define MINOR_VERSION             1
 
 #define GEODESIC_DEG_TO_M         111070.4                             /* conversion [deg] -> [meter]  */
 #define RAD_TO_DEG                57.2957795131                        /* 180/pi                       */
 
-#define CAUSE_IGNITION_ON                0x88
-#define CAUSE_IGNITION_OFF               0x08
-#define CAUSE_COURSE                     0x84
+#define CAUSE_IGNITION_ON         0x88
 
 class Trip_Stats {
 public:
