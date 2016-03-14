@@ -40,6 +40,7 @@ public:
   double record_per_h, ave_dt_s, min_dt_s, max_dt_s;
 };
 
+/////////////////////////////////// LIB ////////////////////////////////////////
 jsoncons::json jsonize(Trip_Stats trip_s) {
   jsoncons::json trip_j;
   trip_j["trip_name"] = trip_s.trip_name;
@@ -65,18 +66,16 @@ void evaluate_stats(std::vector<Trip_Stats> &trip_stats, std::string name, jsonc
   // unifying different type of json in a single pointers array
   std::vector<jsoncons::json *> trip_ptr;
   std::vector<std::vector<jsoncons::json *>> trips_ptr;
-  int old_counter = 0;
   if (trip.is_array()) {
     for (size_t k = 0; k < trip.size(); k++) {
       if (
-        (trip[k].has_member("global_index") && trip[k]["global_index"].as<int>() < old_counter)
+        (k > 0 && trip[k].has_member("enabling") && trip[k]["enabling"].as<std::string>() == "ignition_on")
         ||
-        (trip[k].has_member("cause") && trip[k]["global_index"].as<int>() == CAUSE_IGNITION_ON && k > 0)) {
-        old_counter = 0;
+        (k > 0 && trip[k].has_member("cause") && trip[k]["cause"].as<int>() == CAUSE_IGNITION_ON)
+        ) {
         trips_ptr.push_back(trip_ptr);
         trip_ptr.clear();
       }
-      if (trip[k].has_member("global_index")) old_counter = trip[k]["global_index"].as<int>();
       trip_ptr.push_back(&(trip[k]));
     }
     trips_ptr.push_back(trip_ptr);
@@ -84,15 +83,13 @@ void evaluate_stats(std::vector<Trip_Stats> &trip_stats, std::string name, jsonc
   else if (trip.is_object()) {
     for (auto it = trip.begin_members(); it != trip.end_members(); it++) {
       if (
-        (it->value().has_member("global_index") && it->value()["global_index"].as<int>() < old_counter)
+        (it != trip.begin_members() && it->value().has_member("enabling") && it->value()["enabling"].as<std::string>() == "ignition_on")
         ||
-        (it->value().has_member("cause") && it->value()["cause"].as<int>() == CAUSE_IGNITION_ON && it != trip.begin_members())
+        (it != trip.begin_members() && it->value().has_member("cause") && it->value()["cause"].as<int>() == CAUSE_IGNITION_ON)
         ) {
-        old_counter = 0;
         trips_ptr.push_back(trip_ptr);
         trip_ptr.clear();
       }
-      if (it->value().has_member("global_index")) old_counter = it->value()["global_index"].as<int>();
       trip_ptr.push_back(&(it->value()));
     }
     trips_ptr.push_back(trip_ptr);
@@ -134,7 +131,7 @@ void evaluate_stats(std::vector<Trip_Stats> &trip_stats, std::string name, jsonc
 
       // cause
       if (trips_ptr[i][j]->has_member("enabling")) {
-        if (trips_ptr[i][j]->at("enabling").as<std::string>() == "rdp_engine") 
+        if (trips_ptr[i][j]->at("enabling").as<std::string>() == "rdp_engine")
           ts.rdp_cnt++;
         else if (trips_ptr[i][j]->at("enabling").as<std::string>() == "smart_restore")
           ts.restored_cnt++;
@@ -152,7 +149,7 @@ void evaluate_stats(std::vector<Trip_Stats> &trip_stats, std::string name, jsonc
 }
 
 
-///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////// MAIN ////////////////////////////////////////
 void usage(char* progname) {
   std::cout << "Usage: " << progname << " input_1.json ... input_n.json " << std::endl;
   exit(1);
@@ -201,32 +198,33 @@ int main(int argc, char** argv) {
       std::cout << e.what() << std::endl;
       continue;
     }
-
     evaluate_stats(trip_stats, file, trip_json);
   }
 
   // writing results to txt and json
-  std::ofstream out("trip_stats.txt");
-  out << std::setw(cell_width) << "STATS";                      for (auto t : trip_stats) out << std::setw(cell_width) << t.trip_name;        out << std::endl;
-  out << std::setw(cell_width) << "record number";              for (auto t : trip_stats) out << std::setw(cell_width) << t.record_cnt;       out << std::endl;
-  out << std::setw(cell_width) << "rdp enabled number";         for (auto t : trip_stats) out << std::setw(cell_width) << t.rdp_cnt;          out << std::endl;
-  out << std::setw(cell_width) << "restored number";            for (auto t : trip_stats) out << std::setw(cell_width) << t.restored_cnt;     out << std::endl;
-  out << std::setw(cell_width) << "others number";              for (auto t : trip_stats) out << std::setw(cell_width) << t.others_cnt;       out << std::endl;
-  out << std::setw(cell_width) << "total covered distance (m)"; for (auto t : trip_stats) out << std::setw(cell_width) << t.total_dist;       out << std::endl;
-  out << std::setw(cell_width) << "total time elapsed (s)";     for (auto t : trip_stats) out << std::setw(cell_width) << t.total_time;       out << std::endl;
-  out << std::setw(cell_width) << "record per 10 km";           for (auto t : trip_stats) out << std::setw(cell_width) << t.record_per_10km;  out << std::endl;
-  out << std::setw(cell_width) << "ave dist (m)";               for (auto t : trip_stats) out << std::setw(cell_width) << t.ave_dist_m;       out << std::endl;
-  out << std::setw(cell_width) << "min dist (m)";               for (auto t : trip_stats) out << std::setw(cell_width) << t.min_dist_m;       out << std::endl;
-  out << std::setw(cell_width) << "max dist (m)";               for (auto t : trip_stats) out << std::setw(cell_width) << t.max_dist_m;       out << std::endl;
-  out << std::setw(cell_width) << "record per hour";            for (auto t : trip_stats) out << std::setw(cell_width) << t.record_per_h;     out << std::endl;
-  out << std::setw(cell_width) << "ave dt (s)";                 for (auto t : trip_stats) out << std::setw(cell_width) << t.ave_dt_s;         out << std::endl;
-  out << std::setw(cell_width) << "min dt (s)";                 for (auto t : trip_stats) out << std::setw(cell_width) << t.min_dt_s;         out << std::endl;
-  out << std::setw(cell_width) << "max dt (s)";                 for (auto t : trip_stats) out << std::setw(cell_width) << t.max_dt_s;         out << std::endl;
+  std::stringstream out_basename;
+  out_basename << input[0].substr(0, input[0].size() - 5);
+  std::ofstream out(out_basename.str() + "_TRIPSTATS.txt");
+  out << std::setw(cell_width) << "STATS";                      for (auto t : trip_stats) out << std::setw(cell_width) << t.trip_name;       out << std::endl;
+  out << std::setw(cell_width) << "record number";              for (auto t : trip_stats) out << std::setw(cell_width) << t.record_cnt;      out << std::endl;
+  out << std::setw(cell_width) << "rdp enabled number";         for (auto t : trip_stats) out << std::setw(cell_width) << t.rdp_cnt;         out << std::endl;
+  out << std::setw(cell_width) << "restored number";            for (auto t : trip_stats) out << std::setw(cell_width) << t.restored_cnt;    out << std::endl;
+  out << std::setw(cell_width) << "others number";              for (auto t : trip_stats) out << std::setw(cell_width) << t.others_cnt;      out << std::endl;
+  out << std::setw(cell_width) << "total covered distance (m)"; for (auto t : trip_stats) out << std::setw(cell_width) << t.total_dist;      out << std::endl;
+  out << std::setw(cell_width) << "total time elapsed (s)";     for (auto t : trip_stats) out << std::setw(cell_width) << t.total_time;      out << std::endl;
+  out << std::setw(cell_width) << "record per 10 km";           for (auto t : trip_stats) out << std::setw(cell_width) << t.record_per_10km; out << std::endl;
+  out << std::setw(cell_width) << "ave dist (m)";               for (auto t : trip_stats) out << std::setw(cell_width) << t.ave_dist_m;      out << std::endl;
+  out << std::setw(cell_width) << "min dist (m)";               for (auto t : trip_stats) out << std::setw(cell_width) << t.min_dist_m;      out << std::endl;
+  out << std::setw(cell_width) << "max dist (m)";               for (auto t : trip_stats) out << std::setw(cell_width) << t.max_dist_m;      out << std::endl;
+  out << std::setw(cell_width) << "record per hour";            for (auto t : trip_stats) out << std::setw(cell_width) << t.record_per_h;    out << std::endl;
+  out << std::setw(cell_width) << "ave dt (s)";                 for (auto t : trip_stats) out << std::setw(cell_width) << t.ave_dt_s;        out << std::endl;
+  out << std::setw(cell_width) << "min dt (s)";                 for (auto t : trip_stats) out << std::setw(cell_width) << t.min_dt_s;        out << std::endl;
+  out << std::setw(cell_width) << "max dt (s)";                 for (auto t : trip_stats) out << std::setw(cell_width) << t.max_dt_s;        out << std::endl;
   out.close();
 
   jsoncons::json stats(jsoncons::json::an_array);
   for (auto t : trip_stats) stats.add(jsonize(t));
-  out.open("trip_stats.json");
+  out.open(out_basename.str() + "_TRIPSTATS.json");
   out << jsoncons::pretty_print(stats) << std::endl;
   out.close();
 
