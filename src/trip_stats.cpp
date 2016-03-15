@@ -66,16 +66,21 @@ void evaluate_stats(std::vector<Trip_Stats> &trip_stats, std::string name, jsonc
   // unifying different type of json in a single pointers array
   std::vector<jsoncons::json *> trip_ptr;
   std::vector<std::vector<jsoncons::json *>> trips_ptr;
+  int old_counter = 0;
   if (trip.is_array()) {
     for (size_t k = 0; k < trip.size(); k++) {
       if (
         (k > 0 && trip[k].has_member("enabling") && trip[k]["enabling"].as<std::string>() == "ignition_on")
         ||
         (k > 0 && trip[k].has_member("cause") && trip[k]["cause"].as<int>() == CAUSE_IGNITION_ON)
+        ||
+        (trip[k].has_member("global_index") && trip[k]["global_index"].as<int>() < old_counter)
         ) {
+        old_counter = 0;
         trips_ptr.push_back(trip_ptr);
         trip_ptr.clear();
       }
+      if (trip[k].has_member("global_index")) old_counter = trip[k]["global_index"].as<int>();
       trip_ptr.push_back(&(trip[k]));
     }
     trips_ptr.push_back(trip_ptr);
@@ -86,10 +91,14 @@ void evaluate_stats(std::vector<Trip_Stats> &trip_stats, std::string name, jsonc
         (it != trip.begin_members() && it->value().has_member("enabling") && it->value()["enabling"].as<std::string>() == "ignition_on")
         ||
         (it != trip.begin_members() && it->value().has_member("cause") && it->value()["cause"].as<int>() == CAUSE_IGNITION_ON)
+        ||
+        (it->value().has_member("global_index") && it->value()["global_index"].as<int>() < old_counter)
         ) {
+        old_counter = 0;
         trips_ptr.push_back(trip_ptr);
         trip_ptr.clear();
       }
+      if (it->value().has_member("global_index")) old_counter = it->value()["global_index"].as<int>();
       trip_ptr.push_back(&(it->value()));
     }
     trips_ptr.push_back(trip_ptr);
