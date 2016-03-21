@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{421A7929-29ED-4048-BC6A-00473C007835}</ProjectGuid>
-    <RootNamespace>trip_stats</RootNamespace>
+    <ProjectGuid>{BDA1DA42-4247-4F7E-8EAC-17D5E92FAC65}</ProjectGuid>
+    <RootNamespace>global_stats</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -125,7 +125,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\trip_stats.cpp" />
+    <ClCompile Include="..\src\global_stats.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\class_stats.hpp" />

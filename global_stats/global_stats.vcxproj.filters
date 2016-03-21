@@ -14,11 +14,11 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="Header Files\jsoncons">
-      <UniqueIdentifier>{9bafc054-47ed-45ff-883b-e718d682ba0d}</UniqueIdentifier>
+      <UniqueIdentifier>{29527ff6-3a10-4adb-99c8-b8b60d3c2c71}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\trip_stats.cpp">
+    <ClCompile Include="..\src\global_stats.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
