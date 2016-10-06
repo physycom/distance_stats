@@ -203,3 +203,4 @@ FakesAssemblies/
 *.png
 *.plt
 *.tlog
+*.db

@@ -31,15 +31,14 @@ along with distance_stats. If not, see <http://www.gnu.org/licenses/>.
 #define DEG_TO_RAD                1.745329251e-2                        // pi/180
 
 #define MAJOR_VERSION           1
-#define MINOR_VERSION           3
+#define MINOR_VERSION           4
 
 void usage(char* progname) {
-  std::cout << "Usage: " << progname << " -i [input.json] -o [output_file_basename] " << std::endl;
-  exit(1);
+  std::cerr << "Usage: " << progname << " -i [input.json] -o [output_file_basename] " << std::endl;
 }
 
 int main(int argc, char** argv) {
-  std::cout << "DistanceStats v" << MAJOR_VERSION << "." << MINOR_VERSION << std::endl;
+  std::cout << "distance_stats v" << MAJOR_VERSION << "." << MINOR_VERSION << std::endl;
 
   std::string input_name, output_basename, output_fixed_name, output_dist_dynamic_name, output_lat_dist_dynamic_name, output_lon_dist_dynamic_name, output_angles_name,
     output_index_name, output_gnuplot_fraction_name, output_png_fraction_name, output_gnuplot_cumulative_name, output_png_cumulative_name,
@@ -56,19 +55,22 @@ int main(int argc, char** argv) {
           output_basename = argv[++i];
           break;
         default:    // no match...
-          std::cout << "ERROR: Flag \"" << argv[i] << "\" not recognized. Quitting..." << std::endl;
+          std::cerr << "ERROR: Flag \"" << argv[i] << "\" not recognized. Quitting..." << std::endl;
           usage(argv[0]);
+          exit(-1);
         }
       }
       else {
-        std::cout << "ERROR: Flag \"" << argv[i] << "\" not recognized. Quitting..." << std::endl;
+        std::cerr << "ERROR: Flag \"" << argv[i] << "\" not recognized. Quitting..." << std::endl;
         usage(argv[0]);
+        exit(-2);
       }
     }
   }
   else {
-    std::cout << "ERROR: No flags specified. Read usage and relaunch properly." << std::endl;
+    std::cerr << "ERROR: No flags specified. Read usage and relaunch properly." << std::endl;
     usage(argv[0]);
+    exit(-3);
   }
 
   // Safety checks for file manipulations
@@ -78,18 +80,18 @@ int main(int argc, char** argv) {
 
   if (input_name.size() > 5) {
     if (input_name.substr(input_name.size() - 5, 5) != ".json") {
-      std::cout << input_name << " is not a valid .json file. Quitting..." << std::endl;
-      exit(2);
+      std::cerr << input_name << " is not a valid .json file. Quitting..." << std::endl;
+      exit(-4);
     }
   }
   else {
-    std::cout << input_name << " is not a valid .json file. Quitting..." << std::endl;
-    exit(22);
+    std::cerr << input_name << " is not a valid .json file. Quitting..." << std::endl;
+    exit(-5);
   }
   input_file.open(input_name.c_str());
   if (!input_file) {
-    std::cout << "FAILED: Input file " << input_name << " could not be opened. Quitting..." << std::endl;
-    exit(222);
+    std::cerr << "FAILED: Input file " << input_name << " could not be opened. Quitting..." << std::endl;
+    exit(-6);
   }
   else { std::cout << "SUCCESS: file " << input_name << " opened!\n"; }
   input_file.close();
@@ -121,53 +123,53 @@ int main(int argc, char** argv) {
   output_gnuplot_anglesdistances_script.open(output_gnuplot_anglesdistances_name.c_str());
 
   if (!output_indexes) {
-    std::cout << "FAILED: Output file " << output_index_name << " could not be opened. Quitting..." << std::endl;
-    exit(223);
+    std::cerr << "FAILED: Output file " << output_index_name << " could not be opened. Quitting..." << std::endl;
+    exit(-7);
   }
   else { std::cout << "SUCCESS: file " << output_index_name << " opened!\n"; }
   if (!output_fixed_bins) {
-    std::cout << "FAILED: Output file " << output_fixed_name << " could not be opened. Quitting..." << std::endl;
-    exit(223);
+    std::cerr << "FAILED: Output file " << output_fixed_name << " could not be opened. Quitting..." << std::endl;
+    exit(-8);
   }
   else { std::cout << "SUCCESS: file " << output_fixed_name << " opened!\n"; }
   if (!output_dist_dynamic_bins) {
-    std::cout << "FAILED: Output file " << output_dist_dynamic_name << " could not be opened. Quitting..." << std::endl;
-    exit(223);
+    std::cerr << "FAILED: Output file " << output_dist_dynamic_name << " could not be opened. Quitting..." << std::endl;
+    exit(-9);
   }
   else { std::cout << "SUCCESS: file " << output_dist_dynamic_name << " opened!\n"; }
   if (!output_lat_dist_dynamic_bins) {
-    std::cout << "FAILED: Output file " << output_lat_dist_dynamic_name << " could not be opened. Quitting..." << std::endl;
-    exit(223);
+    std::cerr << "FAILED: Output file " << output_lat_dist_dynamic_name << " could not be opened. Quitting..." << std::endl;
+    exit(-10);
   }
   else { std::cout << "SUCCESS: file " << output_lat_dist_dynamic_name << " opened!\n"; }
   if (!output_lon_dist_dynamic_bins) {
-    std::cout << "FAILED: Output file " << output_lon_dist_dynamic_name << " could not be opened. Quitting..." << std::endl;
-    exit(223);
+    std::cerr << "FAILED: Output file " << output_lon_dist_dynamic_name << " could not be opened. Quitting..." << std::endl;
+    exit(-11);
   }
   else { std::cout << "SUCCESS: file " << output_lon_dist_dynamic_name << " opened!\n"; }
   if (!output_angles_bins) {
-    std::cout << "FAILED: Output file " << output_angles_name << " could not be opened. Quitting..." << std::endl;
-    exit(223);
+    std::cerr << "FAILED: Output file " << output_angles_name << " could not be opened. Quitting..." << std::endl;
+    exit(-12);
   }
   else { std::cout << "SUCCESS: file " << output_angles_name << " opened!\n"; }
   if (!output_gnuplot_fraction_script) {
-    std::cout << "FAILED: Output file " << output_gnuplot_fraction_name << " could not be opened. Quitting..." << std::endl;
-    exit(223);
+    std::cerr << "FAILED: Output file " << output_gnuplot_fraction_name << " could not be opened. Quitting..." << std::endl;
+    exit(-13);
   }
   else { std::cout << "SUCCESS: file " << output_gnuplot_fraction_name << " opened!\n"; }
   if (!output_gnuplot_cumulative_script) {
-    std::cout << "FAILED: Output file " << output_gnuplot_cumulative_name << " could not be opened. Quitting..." << std::endl;
-    exit(223);
+    std::cerr << "FAILED: Output file " << output_gnuplot_cumulative_name << " could not be opened. Quitting..." << std::endl;
+    exit(-14);
   }
   else { std::cout << "SUCCESS: file " << output_gnuplot_cumulative_name << " opened!\n"; }
   if (!output_gnuplot_angles_script) {
-    std::cout << "FAILED: Output file " << output_gnuplot_angles_name << " could not be opened. Quitting..." << std::endl;
-    exit(223);
+    std::cerr << "FAILED: Output file " << output_gnuplot_angles_name << " could not be opened. Quitting..." << std::endl;
+    exit(-15);
   }
   else { std::cout << "SUCCESS: file " << output_gnuplot_angles_name << " opened!\n"; }
   if (!output_gnuplot_anglesdistances_script) {
-    std::cout << "FAILED: Output file " << output_gnuplot_anglesdistances_name << " could not be opened. Quitting..." << std::endl;
-    exit(223);
+    std::cerr << "FAILED: Output file " << output_gnuplot_anglesdistances_name << " could not be opened. Quitting..." << std::endl;
+    exit(-16);
   }
   else { std::cout << "SUCCESS: file " << output_gnuplot_anglesdistances_name << " opened!\n"; }
 
