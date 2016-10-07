@@ -176,7 +176,13 @@ int main(int argc, char** argv) {
 
 
   // Importing json distance database
-  jsoncons::json distance_records = jsoncons::json::parse_file(input_name);
+  jsoncons::json distance_records;
+  try {
+    distance_records = jsoncons::json::parse_file(input_name);
+  }
+  catch (std::exception &e) {
+    std::cout << "EXCEPTION: " << e.what() << std::endl;
+  }
   std::vector<double> distances, lat_distances, lon_distances, angles;
 
   if (distance_records.is_object()) {         // object-style
@@ -213,8 +219,8 @@ int main(int argc, char** argv) {
   std::vector<double> angle_distance(angle_bin_size);
   std::vector<double> angle_counter(angle_bin_size);
   for (size_t i = 0; i < angles.size(); i++) {
-    int bin_index = int(angles[i] / angle_bin_w);
-    if (bin_index == angle_bin_size) bin_index--;
+    int bin_index = int(fabs(angles[i]) / angle_bin_w);
+    if (bin_index >= angle_bin_size) bin_index = angle_bin_size -1;
     angle_distance[bin_index] += distances[i];
     angle_counter[bin_index]++;
   }
