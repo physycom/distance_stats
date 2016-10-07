@@ -31,7 +31,7 @@ along with distance_stats. If not, see <http://www.gnu.org/licenses/>.
 #define DEG_TO_RAD                1.745329251e-2                        // pi/180
 
 #define MAJOR_VERSION           1
-#define MINOR_VERSION           4
+#define MINOR_VERSION           5
 
 void usage(char* progname) {
   std::cerr << "Usage: " << progname << " -i [input.json] -o [output_file_basename] " << std::endl;
@@ -360,11 +360,12 @@ int main(int argc, char** argv) {
 
   //Write output file, compatible with gnuplot
   counter = 0;
+  output_dist_dynamic_bins << "-0.5\t-0.5\t0.5\t0.0\t0.0" << std::endl;
   for (auto a : distances_fraction_bins) {
     output_dist_dynamic_bins << counter << "\t";
     output_dist_dynamic_bins << counter*bin_w << "\t";
     output_dist_dynamic_bins << (counter + 1)*bin_w << "\t";
-    output_dist_dynamic_bins << a /*distances_fraction_bins[counter]*/ << "\t";
+    output_dist_dynamic_bins << a << "\t";
     output_dist_dynamic_bins << distances_cumulative_bins[counter] << "\t";
     output_dist_dynamic_bins << std::endl;
     counter++;
@@ -375,7 +376,7 @@ int main(int argc, char** argv) {
     output_lat_dist_dynamic_bins << counter << "\t";
     output_lat_dist_dynamic_bins << std::floor(inf_lat_distance) + counter*bin_w << "\t";
     output_lat_dist_dynamic_bins << std::floor(inf_lat_distance) + (counter + 1)*bin_w << "\t";
-    output_lat_dist_dynamic_bins << a /*lat_distances_fraction_bins[counter]*/ << "\t";
+    output_lat_dist_dynamic_bins << a << "\t";
     output_lat_dist_dynamic_bins << lat_distances_cumulative_bins[counter] << "\t";
     output_lat_dist_dynamic_bins << std::endl;
     counter++;
@@ -386,7 +387,7 @@ int main(int argc, char** argv) {
     output_lon_dist_dynamic_bins << counter << "\t";
     output_lon_dist_dynamic_bins << std::floor(inf_lon_distance) + counter*bin_w << "\t";
     output_lon_dist_dynamic_bins << std::floor(inf_lon_distance) + (counter + 1)*bin_w << "\t";
-    output_lon_dist_dynamic_bins << a /*lon_distances_fraction_bins[counter]*/ << "\t";
+    output_lon_dist_dynamic_bins << a << "\t";
     output_lon_dist_dynamic_bins << lon_distances_cumulative_bins[counter] << "\t";
     output_lon_dist_dynamic_bins << std::endl;
     counter++;
@@ -394,20 +395,38 @@ int main(int argc, char** argv) {
 
 
   //=======================================
-  //Prepare gnuplot script to plot histograms of all pdf
+  //Prepare gnuplot script to plot all histograms
+  const std::string gnuplot_styles = R"(# Styles
+linew = 1.2
+set style line  21 lc rgb '#0072bd' lt 7 lw linew pi -1 # blue
+set style line  22 lc rgb '#d95319' lt 7 lw linew pi -1 # orange
+set style line  23 lc rgb '#77ac30' lt 7 lw linew pi -1 # green
+set style line  24 lc rgb '#a2142f' lt 7 lw linew pi -1 # red
+set style line 101 lc rgb '#000000' lt 1 lw 1                     # black
+set style line 102 lc rgb '#d6d7d9' lt 1 lw 1                     # gray
+# Border xy
+set border 3 front ls 101
+set tics nomirror out scale 0.75
+set format '%g'
+set border linewidth 1.5
+# Grid
+set grid xtics ytics back ls 102
+# Plot
+)";
+
   output_gnuplot_fraction_script << "#!/gnuplot\n";
   output_gnuplot_fraction_script << "FILE_IN_TOT='" << output_dist_dynamic_name << "'\n";
   output_gnuplot_fraction_script << "FILE_IN_LAT='" << output_lat_dist_dynamic_name << "'\n";
   output_gnuplot_fraction_script << "FILE_IN_LON='" << output_lon_dist_dynamic_name << "'\n";
   output_gnuplot_fraction_script << "FILE_OUT='" << output_png_fraction_name << "'\n";
-  output_gnuplot_fraction_script << "set terminal pngcairo size " << Xres << ',' << Yres << " font \",25\"\n";
+  output_gnuplot_fraction_script << "set terminal pngcairo dashed size " << Xres << ',' << Yres << " enhanced font 'Verdana,10'\n";
+  output_gnuplot_fraction_script << gnuplot_styles;
   output_gnuplot_fraction_script << "set output FILE_OUT\n";
   output_gnuplot_fraction_script << "set xlabel 'd (m)' \n";
   output_gnuplot_fraction_script << "set ylabel '{/Symbol r}'\n";
-  output_gnuplot_fraction_script << "#set yrange[0:1]\n";
-  output_gnuplot_fraction_script << "plot FILE_IN_TOT u ($2+$3)/2:4 w histeps lt 1 lc rgb 'blue' lw 3 t 'tot',\\" << "\n";
-  output_gnuplot_fraction_script << "FILE_IN_LAT u ($2+$3)/2:4 w histeps lt 1 lc rgb 'red' lw 3 t 'lat',\\" << "\n";
-  output_gnuplot_fraction_script << "FILE_IN_LON u ($2+$3)/2:4 w histeps lt 1 lc rgb 'dark-green' lw 3 t 'lon'";
+  output_gnuplot_fraction_script << "plot FILE_IN_TOT u ($2+$3)/2:4 w histeps ls 21 t 'tot',\\" << "\n";
+  output_gnuplot_fraction_script << "     FILE_IN_LAT u ($2+$3)/2:4 w histeps ls 24 t 'lat',\\" << "\n";
+  output_gnuplot_fraction_script << "     FILE_IN_LON u ($2+$3)/2:4 w histeps ls 23 t 'lon'";
   output_gnuplot_fraction_script << "\n";
 
   output_gnuplot_cumulative_script << "#!/gnuplot\n";
@@ -415,21 +434,23 @@ int main(int argc, char** argv) {
   output_gnuplot_cumulative_script << "FILE_IN_LAT='" << output_lat_dist_dynamic_name << "'\n";
   output_gnuplot_cumulative_script << "FILE_IN_LON='" << output_lon_dist_dynamic_name << "'\n";
   output_gnuplot_cumulative_script << "FILE_OUT='" << output_png_cumulative_name << "'\n";
-  output_gnuplot_cumulative_script << "set terminal pngcairo size " << Xres << ',' << Yres << " font \",25\"\n";
+  output_gnuplot_cumulative_script << "set terminal pngcairo dashed size " << Xres << ',' << Yres << " enhanced font 'Verdana,10'\n";
+  output_gnuplot_cumulative_script << gnuplot_styles;
+  output_gnuplot_cumulative_script << "set pointintervalbox 1.5\n";
   output_gnuplot_cumulative_script << "set key bottom right\n";
   output_gnuplot_cumulative_script << "set output FILE_OUT\n";
   output_gnuplot_cumulative_script << "set xlabel 'd (m)' \n";
   output_gnuplot_cumulative_script << "set ylabel '{/Symbol r}_{int}'\n";
   output_gnuplot_cumulative_script << "set yrange[0:1]\n";
-  output_gnuplot_cumulative_script << "plot FILE_IN_TOT u ($2+$3)/2:5 w points pt 2 ps 3 lw 3 lc rgb 'blue' t 'tot',\\" << "\n";
-  output_gnuplot_cumulative_script << "FILE_IN_LAT u ($2+$3)/2:5 w points pt 2 ps 3 lw 3 lc rgb 'red' t 'lat',\\" << "\n";
-  output_gnuplot_cumulative_script << "FILE_IN_LON u ($2+$3)/2:5 w points pt 2 ps 3 lw 3 lc rgb 'dark-green' t 'lon'";
+  output_gnuplot_cumulative_script << "plot FILE_IN_TOT u ($2+$3)/2:5 w linespoints ls 21 t 'tot',\\" << "\n";
+  output_gnuplot_cumulative_script << "     FILE_IN_LAT u ($2+$3)/2:5 w linespoints ls 24 t 'lat',\\" << "\n";
+  output_gnuplot_cumulative_script << "     FILE_IN_LON u ($2+$3)/2:5 w linespoints ls 23 t 'lon'";
   output_gnuplot_cumulative_script << "\n";
 
   output_gnuplot_angles_script << "#!/gnuplot\n";
   output_gnuplot_angles_script << "FILE_IN='" << output_angles_name << "'\n";
   output_gnuplot_angles_script << "FILE_OUT='" << output_png_angles_name << "'\n";
-  output_gnuplot_angles_script << "set terminal pngcairo size " << Xres << ',' << Yres << " font \",25\"\n";
+  output_gnuplot_angles_script << "set terminal pngcairo dashed size " << Xres << ',' << Yres << " enhanced font 'Verdana,10'\n";
   output_gnuplot_angles_script << "set output FILE_OUT\n";
   output_gnuplot_angles_script << "set key bottom right\n";
   output_gnuplot_angles_script << "set angles degrees\n";
@@ -443,7 +464,7 @@ int main(int argc, char** argv) {
   output_gnuplot_anglesdistances_script << "#!/gnuplot\n";
   output_gnuplot_anglesdistances_script << "FILE_IN='" << output_angles_name << "'\n";
   output_gnuplot_anglesdistances_script << "FILE_OUT='" << output_png_anglesdistances_name << "'\n";
-  output_gnuplot_anglesdistances_script << "set terminal pngcairo size " << Xres << ',' << Yres << " font \",25\"\n";
+  output_gnuplot_anglesdistances_script << "set terminal pngcairo dashed size " << Xres << ',' << Yres << " enhanced font 'Verdana,10'\n";
   output_gnuplot_anglesdistances_script << "set output FILE_OUT\n";
   output_gnuplot_anglesdistances_script << "set key bottom right\n";
   output_gnuplot_anglesdistances_script << "set angles degrees\n";
@@ -455,7 +476,6 @@ int main(int argc, char** argv) {
   output_gnuplot_anglesdistances_script << "plot FILE_IN u 2:4 notitle\n";
   output_gnuplot_anglesdistances_script << "\n";
 
-
   output_indexes.close();
   output_fixed_bins.close();
   output_dist_dynamic_bins.close();
@@ -466,7 +486,6 @@ int main(int argc, char** argv) {
   output_gnuplot_cumulative_script.close();
   output_gnuplot_angles_script.close();
   output_gnuplot_anglesdistances_script.close();
-
 
   return 0;
 }
