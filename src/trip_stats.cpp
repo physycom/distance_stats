@@ -18,8 +18,6 @@ along with distance_stats. If not, see <http://www.gnu.org/licenses/>.
 ***************************************************************************/
 
 
-#define _CRT_SECURE_NO_WARNINGS
-
 #include "jsoncons/json.hpp"
 
 #include "class_stats.hpp"
@@ -212,7 +210,7 @@ int main(int argc, char** argv) {
   out << std::setw(cell_width) << "max dt (s)";                 for (auto t : trip_stats) out << std::setw(cell_width) << t.max_dt_s;        out << std::endl;
   out.close();
 
-  jsoncons::json stats(jsoncons::json::an_array);
+  jsoncons::json stats = jsoncons::json::array();
   for (auto t : trip_stats) stats.add(jsonize(t));
   out.open(out_basename.str() + "_TRIPSTATS.json");
   out << jsoncons::pretty_print(stats) << std::endl;

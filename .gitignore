@@ -204,3 +204,7 @@ FakesAssemblies/
 *.plt
 *.tlog
 *.db
+*.idb
+bin/
+obj/
+

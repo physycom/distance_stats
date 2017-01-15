@@ -18,8 +18,6 @@ along with distance_stats. If not, see <http://www.gnu.org/licenses/>.
 ***************************************************************************/
 
 
-#define _CRT_SECURE_NO_WARNINGS
-
 #include "jsoncons/json.hpp"
 
 #include "class_stats.hpp"

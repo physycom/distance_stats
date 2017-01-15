@@ -2,16 +2,20 @@ EXE1=distance_stats.exe
 EXE2=global_stats.exe
 EXE3=trip_stats.exe
 
-all:
-	$(CXX) -std=c++11 -Isrc -o $(EXE1) src/distance_stats.cpp
-	$(CXX) -std=c++11 -Isrc -o $(EXE2) src/global_stats.cpp
-	$(CXX) -std=c++11 -Isrc -o $(EXE3) src/trip_stats.cpp
+all: dirtree
+	$(CXX) -std=c++11 -Isrc/jsoncons/src -o bin/$(EXE1) src/distance_stats.cpp
+	$(CXX) -std=c++11 -Isrc/jsoncons/src -o bin/$(EXE2) src/global_stats.cpp
+	$(CXX) -std=c++11 -Isrc/jsoncons/src -o bin/$(EXE3) src/trip_stats.cpp
+
+dirtree:
+	@mkdir -p bin
+	@mkdir -p obj
 
 clean:
-	rm -rf *.o x64 Debug Release *.sdf *.ilk *.pdb *.iobj *.obj *.ipdb src/Debug src/Release src/x64
+	rm -f *.o *.sdf *.ilk *.pdb *.iobj *.obj *.ipdb bin/*.exe
 
 cleanall: clean
-	rm -rf *.exe
+	rm -rf bin obj
 
 
 
