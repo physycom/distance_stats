@@ -1,4 +1,6 @@
 
+#include "jsoncons/json.hpp"
+
 class Trip_Stats {
 public:
   std::string trip_name;

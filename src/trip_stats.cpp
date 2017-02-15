@@ -30,7 +30,6 @@ along with distance_stats. If not, see <http://www.gnu.org/licenses/>.
 
 #define CAUSE_IGNITION_ON         0x88
 
-/////////////////////////////////// LIB ////////////////////////////////////////
 void evaluate_stats(std::vector<Trip_Stats> &trip_stats, std::string name, jsoncons::json trip) {
 
   // unifying different type of json in a single pointers array
@@ -137,7 +136,6 @@ void evaluate_stats(std::vector<Trip_Stats> &trip_stats, std::string name, jsonc
 }
 
 
-/////////////////////////////////// MAIN ////////////////////////////////////////
 void usage(char* progname) {
   std::cout << "Usage: " << progname << " input_1.json ... input_n.json " << std::endl;
   exit(1);

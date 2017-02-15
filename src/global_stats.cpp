@@ -18,15 +18,12 @@ along with distance_stats. If not, see <http://www.gnu.org/licenses/>.
 ***************************************************************************/
 
 
-#include "jsoncons/json.hpp"
-
 #include "class_stats.hpp"
 
 #define MAJOR_VERSION             1
 #define MINOR_VERSION             1
 
 
-/////////////////////////////////// MAIN ////////////////////////////////////////
 void usage(char* progname) {
   std::cout << "Usage: " << progname << " input_1.json ... input_n.json " << std::endl;
   exit(1);
