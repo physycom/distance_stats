@@ -280,7 +280,7 @@ int main(int argc, char** argv) {
 
 
   //=======================================
-  // Scenario 2 : dynamical bins
+  // Scenario 2 : dynamic bins
   int distances_n_bin = int(max_distance / bin_w) + 1;
   int lat_distances_n_bin = int((sup_lat_distance - inf_lat_distance) / bin_w) + 1;
   int lon_distances_n_bin = int((sup_lon_distance - inf_lon_distance) / bin_w) + 1;;
