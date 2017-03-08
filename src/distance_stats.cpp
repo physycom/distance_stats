@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
   if (argc > 2) { /* Parse arguments, if there are arguments supplied */
     for (int i = 1; i < argc; i++) {
       if ((argv[i][0] == '-') || (argv[i][0] == '/')) {       // switches or options...
-        switch (tolower(argv[i][1])) {
+        switch (::tolower(argv[i][1])) {
         case 'i':
           input_name = argv[++i];
           break;
@@ -124,53 +124,42 @@ int main(int argc, char** argv) {
     std::cerr << "FAILED: Output file " << output_index_name << " could not be opened. Quitting..." << std::endl;
     exit(-7);
   }
-  else { std::cout << "SUCCESS: file " << output_index_name << " opened!\n"; }
   if (!output_fixed_bins) {
     std::cerr << "FAILED: Output file " << output_fixed_name << " could not be opened. Quitting..." << std::endl;
     exit(-8);
   }
-  else { std::cout << "SUCCESS: file " << output_fixed_name << " opened!\n"; }
   if (!output_dist_dynamic_bins) {
     std::cerr << "FAILED: Output file " << output_dist_dynamic_name << " could not be opened. Quitting..." << std::endl;
     exit(-9);
   }
-  else { std::cout << "SUCCESS: file " << output_dist_dynamic_name << " opened!\n"; }
   if (!output_lat_dist_dynamic_bins) {
     std::cerr << "FAILED: Output file " << output_lat_dist_dynamic_name << " could not be opened. Quitting..." << std::endl;
     exit(-10);
   }
-  else { std::cout << "SUCCESS: file " << output_lat_dist_dynamic_name << " opened!\n"; }
   if (!output_lon_dist_dynamic_bins) {
     std::cerr << "FAILED: Output file " << output_lon_dist_dynamic_name << " could not be opened. Quitting..." << std::endl;
     exit(-11);
   }
-  else { std::cout << "SUCCESS: file " << output_lon_dist_dynamic_name << " opened!\n"; }
   if (!output_angles_bins) {
     std::cerr << "FAILED: Output file " << output_angles_name << " could not be opened. Quitting..." << std::endl;
     exit(-12);
   }
-  else { std::cout << "SUCCESS: file " << output_angles_name << " opened!\n"; }
   if (!output_gnuplot_fraction_script) {
     std::cerr << "FAILED: Output file " << output_gnuplot_fraction_name << " could not be opened. Quitting..." << std::endl;
     exit(-13);
   }
-  else { std::cout << "SUCCESS: file " << output_gnuplot_fraction_name << " opened!\n"; }
   if (!output_gnuplot_cumulative_script) {
     std::cerr << "FAILED: Output file " << output_gnuplot_cumulative_name << " could not be opened. Quitting..." << std::endl;
     exit(-14);
   }
-  else { std::cout << "SUCCESS: file " << output_gnuplot_cumulative_name << " opened!\n"; }
   if (!output_gnuplot_angles_script) {
     std::cerr << "FAILED: Output file " << output_gnuplot_angles_name << " could not be opened. Quitting..." << std::endl;
     exit(-15);
   }
-  else { std::cout << "SUCCESS: file " << output_gnuplot_angles_name << " opened!\n"; }
   if (!output_gnuplot_anglesdistances_script) {
     std::cerr << "FAILED: Output file " << output_gnuplot_anglesdistances_name << " could not be opened. Quitting..." << std::endl;
     exit(-16);
   }
-  else { std::cout << "SUCCESS: file " << output_gnuplot_anglesdistances_name << " opened!\n"; }
-
 
 
   // Importing json distance database
