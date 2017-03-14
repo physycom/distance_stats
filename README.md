@@ -21,16 +21,13 @@ author: "Fabbri, Sinigardi"
 </a>
 
 
-### Purpose
-
-
 ### Installation
 **make** and a **C++11** compatible compiler are required. Clone the repo and type ``make``, it should be enough in most cases to build the two executables!   
-There's also a **VS2015** solution avalaible.   
+There's also a **VS2017** solution avalaible.   
 Contains [jsoncons](https://github.com/danielaparker/jsoncons) as a git submodule.   
 
 
-### Usage
+### Synopsis
 ```
 distance_stats.exe -i input.json -o output_file
 ```
