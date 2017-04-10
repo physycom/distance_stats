@@ -22,7 +22,7 @@ install:
   - vcpkg integrate install
   #- vcpkg install boost
   - cd ..
-  - cd C:\projects\distance_stats
+  - cd C:\projects\distance-stats
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
 build_script:
   - mkdir build
