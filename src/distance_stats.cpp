@@ -1,4 +1,4 @@
-/* Copyright 2015 - Alessandro Fabbri, Stefano Sinigardi */
+/* Copyright 2015-2017 - Alessandro Fabbri, Stefano Sinigardi */
 
 /***************************************************************************
 This file is part of distance_stats.

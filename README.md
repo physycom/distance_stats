@@ -22,15 +22,19 @@ author: "Fabbri, Sinigardi"
 
 
 ### Installation
-**make** and a **C++11** compatible compiler are required. Clone the repo and type ``make``, it should be enough in most cases to build the two executables!   
-There's also a **VS2017** solution avalaible.   
+**CMake** and a **C++11** compatible compiler are required. Clone the repo, then this command should build and install in the local bin folder the executables:
+```
+mkdir build ; cd build ; cmake .. ; cmake --build . --target install ; cd ..
+```
+
 Contains [jsoncons](https://github.com/danielaparker/jsoncons) as a git submodule.   
 
 
 ### Synopsis
 ```
 distance_stats.exe -i input.json -o output_file
+trip_stats.exe input1.json input2.json ...
+global_stats.exe input1.TRIPSTATS.json input2.TRIPSTATS.json ...
 ```
-where *input.json* must be an existing and valid .json file and *output_file* must be accessible.
 
 

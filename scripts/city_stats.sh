@@ -19,12 +19,12 @@
     done 
     if [ -s unique.mxp ] ; then mxpparser -i unique.mxp -o "${basefile}.json" ; fi
     if [ -s "${basefile}.json" ] ; then json_to_html -i "${basefile}.json" -o "${basefile}.html" ; fi
-    trip_stats "${basefile}.json"
+    if [ -s "${basefile}.json" ] ; then trip_stats "${basefile}.json" ; fi
 
     rm -f ./*.mxp ./*.log ./*.err "${basefile}"*CALIB*.json "${basefile}"*DIAG*.json "${basefile}"*TRIPSTATS*.txt
     #rm -f *.mxp *.log *.err ${basefile}*.json
   done
 
-  global_stats ./*TRIPSTATS*.json
+  if [ -f "./*TRIPSTATS*.json" ] ; then global_stats ./*TRIPSTATS*.json
 } 2>&1 | tee -a batch_log 
 

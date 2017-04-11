@@ -17,7 +17,6 @@
 [Rr]eleases/
 x64/
 x86/
-build/
 bld/
 [Bb]in/
 [Oo]bj/
@@ -197,10 +196,18 @@ FakesAssemblies/
 *.opendb
 *.ipdb
 *.iobj
-*.exe
 *.tlog
 *.db
 *.idb
+
+# CLion folders
+.idea/
+
+# Build folders
 bin/
-obj/
+build/
+cmake-build-debug/
+cmake-build-release/
+
+
 
