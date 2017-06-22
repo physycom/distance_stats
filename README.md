@@ -22,10 +22,11 @@ author: "Fabbri, Sinigardi"
 
 
 ### Installation
-**CMake** and a **C++11** compatible compiler are required. Clone the repo, then this command should build and install in the local bin folder the executables:
+**CMake** and a **C++11** compatible compiler are required. To build the executable, clone the repo and then type  
 ```
-mkdir build ; cd build ; cmake .. ; cmake --build . --target install ; cd ..
+mkdir build ; cd build ; cmake .. ; cmake --build . --target install
 ```
+With CMake you can also deploy projects for the most common IDEs.  
 
 Contains [jsoncons](https://github.com/danielaparker/jsoncons) as a git submodule.   
 
